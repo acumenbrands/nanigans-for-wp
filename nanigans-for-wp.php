@@ -29,7 +29,7 @@ HTML;
 
     function wp_footer_action(){
       $output = "";
-      $nanigans_id = get_option('NTWP_nanigans_id');
+      $nanigans_app_id = get_option('NTWP_nanigans_app_id');
 
       $output .= <<<HTML
         <script type="text/javascript">
@@ -113,7 +113,7 @@ HTML;
             Cookiemonger.save({'nanigans_user_id':window.nanigans_user_id});
 
             window.nanigans_tracker = new Image();
-            nanigans_tracker.src = "//api.nanigans.com/event.php?app_id={$nanigans_id}&type=visit&name=landing&user_id=" + window.nanigans_user_id;
+            nanigans_tracker.src = "//api.nanigans.com/event.php?app_id={$nanigans_app_id}&type=visit&name=landing&user_id=" + window.nanigans_user_id;
           }
 
 
@@ -122,7 +122,7 @@ HTML;
             $('form').has('input[type="email"],input[name~="email"]').submit('submit',function(){
               var nanigans_user_id = Cookiemonger.find('nanigans_user_id');
               window.nanigans_tracker = new Image();
-              nanigans_tracker.src = "//api.nanigans.com/event.php?app_id={$nanigans_id}&type=visit&name=email&user_id=" + nanigans_user_id;
+              nanigans_tracker.src = "//api.nanigans.com/event.php?app_id={$nanigans_app_id}&type=visit&name=email&user_id=" + nanigans_user_id;
             });
           });
         </script>
@@ -137,11 +137,7 @@ HTML;
           
         // Setup Nanigans Settings Form
         $options = array(
-          'nanigans_id',
-          'nanigans_lid',
-          'nanigans_referral_enabled',
-          'nanigans_referral_mid',
-          'nanigans_referral_lid'
+          'nanigans_app_id'
         );
         foreach ( $options as $opt ){
           delete_option ( 'NTWP_'.$opt, $_POST[$opt] );
@@ -171,53 +167,9 @@ HTML;
                 <p>These are the list IDs needed for the <strong>primary squeeze page signup action</strong>.</p>
                 
                 <div class="form-field">
-                  <label for="nanigans_id">MID</label>
-                  <input name="nanigans_id" type="text" id="nanigans_id" value="<?php echo get_option('NTWP_nanigans_id'); ?>" />
-                  <p>The Nanigans <b>Business Unit ID</b>.</p>
-                  <p>Usually, an 8-digit number in peranthesis, next to &quot;Welcome, Company Name&quot; in the upper-right of the dashboard.</p>
-                </div>
-
-                <div class="form-field">
-                  <label for="nanigans_lid">LID</label>
-                  <input name="nanigans_lid" type="text" id="nanigans_lid" value="<?php echo get_option('NTWP_nanigans_lid'); ?>" />
-                  <p>The Nanigans <b>List ID</b>.</p>
-                </div>
-
-              </div>
-            </div>
-          </div>
-        </div>
-
-        <div id="col-container">
-          <div id="col-left">
-            <div class="col-wrap">
-              <div class="form-wrap">
-                
-                <h3>Nanigans <i>Referral</i> Campaign</h3>
-                <p>Used to handle <strong>email referral lists. Not subscribers.</strong></p>
-                
-                <table class="form-table">
-                  <tbody>
-                  <tr>
-                    <th scope="row">Referral Form</th>
-                    <td><label for="nanigans_referral_enabled"><input type="checkbox" name="nanigans_referral_enabled" id="nanigans_referral_enabled" value="1"<?php checked( 1 == get_option('NTWP_nanigans_referral_enabled' )); ?> class="tog"/> enable.</label></td>
-                  </tr>
-                  <tr>
-                  </tbody>
-                </table>
-
-                <div class="form-field">
-                  <label for="nanigans_referral_mid">MID</label>
-                  <input name="nanigans_referral_mid" type="text" id="nanigans_referral_mid" value="<?php echo get_option('NTWP_nanigans_referral_mid'); ?>" />
-                  <p>The Nanigans <b>Business Unit ID</b>.</p>
-                  <p>May be the same as MID above.</p>
-                </div>
-
-                <div class="form-field">
-                  <label for="nanigans_referral_lid">LID</label>
-                  <input name="nanigans_referral_lid" type="text" id="nanigans_referral_lid" value="<?php echo get_option('NTWP_nanigans_referral_lid'); ?>" />
-                  <p>The Nanigans <b>List ID</b>.</p>
-                  <p><strong>Must be different</strong> from Subscriber LID above.</p>
+                  <label for="nanigans_app_id">App ID</label>
+                  <input name="nanigans_app_id" type="text" id="nanigans_app_id" value="<?php echo get_option('NTWP_nanigans_app_id'); ?>" />
+                  <p>This site's Nanigans <b>App ID</b>.</p>
                 </div>
                 
                 <p class="submit">
@@ -238,11 +190,7 @@ HTML;
     }
 
     function NTWP_warning() {
-      echo "<div id='NTWP-warning' class='updated fade'><p><strong>Nanigans Settings are almost ready.</strong> ".sprintf('You must <a href="%1$s">enter an Nanigans MID and LID</a> for it to work.', "admin.php?page=ntwp_settings")."</p></div>";
-    }
-
-    function NTWP_curl_warning() {
-      echo "<div id='NTWP-curl-warning' class='updated fade'><p><strong>cURL PHP is not installed on this server. Nanigans will not work without cURL library installed.</strong></p></div>";
+      echo "<div id='NTWP-warning' class='updated fade'><p><strong>Nanigans Settings are almost ready.</strong> ".sprintf('You must <a href="%1$s">enter an Nanigans App ID</a> for it to work.', "admin.php?page=ntwp_settings")."</p></div>";
     }
 
   }
@@ -262,12 +210,8 @@ if (isset($NTWP)) :
   add_action( 'admin_menu', array(&$NTWP,'NTWP_admin_menu') );
   
   // Warnings
-  if (!get_option('NTWP_nanigans_id') && !get_option('NTWP_nanigans_lid') && !isset($_POST['submit'])):
+  if (!get_option('NTWP_nanigans_app_id') && !get_option('NTWP_nanigans_lid') && !isset($_POST['submit'])):
     add_action('admin_notices', array(&$NTWP,'NTWP_warning') );
-  endif;
-
-  if (!function_exists('curl_init')):
-    add_action('admin_notices', array(&$NTWP,'NTWP_curl_warning') );
   endif;
 
 endif;
